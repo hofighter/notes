@@ -1,0 +1,80 @@
+生成器
+	
+	在Python中，有种一边循环一边计算的机制，称为生成器：generator。
+	
+	要创建一个generator，有很多种方法。第一种方法很简单，只要把一个列表生成时的[]改成(),
+	就创建了一个generator：
+	###############################################
+		>>> L = [x * x for x in range(10)]
+		>>> L
+		[0, 1, 4, 9, 16, 25, 36, 49, 64, 81]
+		>>> g = (x * x for x in range(10))
+		>>> g
+		<generator object <genexpr> at 0x02E0F4E0>
+	###############################################
+	创建L和g的区别仅在于最外层的[]和(),L是一个list，而g是一个generator。
+	
+	如果要一个一个打印元素，可以通过next()函数获得generator的下一个返回值.
+	
+	generator保存的是算法，每次调用next(g),就计算出g的下一个元素的值，知道计算到最后一个
+	元素，没有更多的元素时，抛出StopIteration的错误。
+	
+	当然，可以用for循环输出生成器的值，因为generator是可迭代对象：
+	###############################################
+		>>> g = (x * x for x in range(10))
+		>>> for n in g:
+		...		print(n)
+		...
+		0
+		1
+		4
+		9
+		16
+		25
+		36
+		49
+		64
+		81
+	###############################################
+	所以，我们创建一个generator后，基本上永远不会调用next()，而是通过for循环来迭代它，并且不需要关心
+	StopIteration的错误。
+	
+	generator非常强大。如果推算的算法比较复杂，用类似列表生成式的for循环无法实现的时候，还可以用
+	函数来实现。
+	
+	实现一个斐波拉契数列的推算规则。
+	###############################################
+		def fib(max):
+			n, a, b = 0, 0, 1
+			while n < max:
+				yield b
+				a, b = b, a + b
+				n = n + 1
+			return 'done'
+		>>> f = fib(6)
+		>>> f
+		<generator object fib at 0x02E0F4E0>
+	###############################################
+	这是定义generator的另一种方法。如果一个函数定义中包含yield关键字。那么这个函数就不再
+	是一个普通函数，而是一个generator.
+	
+	这里，最难理解的就是generator和函数的执行流程不一样。函数是顺序执行，遇到return语句或者最后一行函数
+	语句就返回。而变成generator的函数，在每次调用next()的时候执行，遇到yield语句返回，再次
+	执行时从上次返回的yield语句出继续执行。
+	
+迭代器
+
+	可以直接作用于for循环的对象统称为可迭代对象：Iterable。
+		可以使用isinstance()判断一个对象是否是Iterable：isinstance('abc',Iterable).
+	
+	可以被next()函数调用并不断返回下一个值的对象称为迭代器：Iterator。
+		可以使用isinstance()判断一个对象是否是iterator对象：isinstance('abc',Iterator)。函数是顺序执行，遇到return语句或者最后一行函数
+	
+	生成器都是Iterator对象，但list、dict、str虽然是Iterable，却不是Iterator。
+	
+	把list、dict、str等Iterable变成iterator可以使用iter()函数：
+	isinstance(iter('abc'),Iterator)
+	
+	
+	
+	
