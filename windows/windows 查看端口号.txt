@@ -1,0 +1,7 @@
+windows 查看端口：
+
+netstat -aon|findstr "端口号"
+
+tasklist|findstr "PID"
+
+taskkill /f /t /im 进程名.exe
