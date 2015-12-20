@@ -1,0 +1,78 @@
+1.git config命令
+	git config --global user.name "Your Name"
+	git config --global user.email "email@example.com"
+
+	因为Git是分布式版本的控制系统，所以，每个机器都必须自报家门：你的名字和Email地址。
+	注意：git config 命令的--global参数，用了这个参数，表示你这台机器上所有的Git仓库都
+		  会使用这个配置，当然也可以对某个仓库指定不同的用户名和Email地址。
+
+2.创建版本库
+	版本库即为仓库（repository）：
+	$ mkdir repname
+	$ cd repname
+	$ git init  		//通过这个命令把这个目录变成Git可以管理的仓库
+	
+	使用Windows的童鞋要特别注意：
+		千万不要使用Windows自带的记事本编辑任何文本文件。原因是Microsoft开发记事本的团队
+		使用了一个非常弱智的行为来保存UTF-8编码的文件，他们自作聪明地在每个文件开头添加了
+		0xefbbbf（十六进制）的字符，你会遇到很多不可思议的问题，比如，网页第一行可能会显
+		示一个“?”，明明正确的程序一编译就报语法错误，等等，都是由记事本的弱智行为带来的。
+		建议你下载Notepad++代替记事本，不但功能强大，而且免费！记得把Notepad++的默认编码设置为UTF-8 without BOM即可
+	
+3.添加
+	$ git add filename
+	
+4.提交
+	$ git commit -m "some massage"
+	
+5.查看状态
+	$ git status
+	
+6.查看修改内容
+	$ git diff filename
+	
+7.查看历史记录
+	$ git log 						//显示日志信息
+	$ git log --pretty=oneline		//显示简要日志信息
+
+8.回退到过去
+	$ git reset --hard HEAD^		//HEAD^表示上一个版本，HEAD^^表示上上一个版本，HEAD~100表示往上100个版本
+	
+9.回到未来
+	$ git reset --hard (commit id)	//commit id 是你在提交时通过SHA1计算出来的一个非常大的数字，用十六进制表示
+										commit id没有必要写全，前几位就可以了（6·7位吧）
+										
+10.查看历史命令
+	$ git reflog					//查看之前打过的命令以及一些信息，每个命令都有一个id，所以可以查看到之前打过的
+										commit id
+11.删除文件
+	$ git rm						//用于删除一个文件。
+	
+12.远程仓库
+	由于你的本地Git仓库和GitHub仓库之间的传输是通过SSH加密的，所以，需要一点设置：
+	（1）创建SSH Key。在用户主目录下，看看有没有.ssh目录，如果有，再看看这个目录下有没有id_rsa和id_rsa.pub这两个文件，
+		如果已经有了，可直接跳到下一步。如果没有，打开Shell，创建SSH Key:
+		$ ssh-keygen -t rsa -C "youremail@example.com"
+		一路回车，可能需要设置密码，可以不设置
+		
+		如果一切顺利的话，可以在用户主目录里找到.ssh目录，里面有id_rsa和id_rsa.pub两个文件，这两个就是
+		SSH Key的密钥对，id_rsa是私钥，不能泄露出去，id_rsa.pub是公钥，可以放心地告诉任何人。
+	（2）登录GitHub，打开"Account settings"，"SSH Keys"页面：
+		然后，点"Add SSH Key"，填上任意Title，在Key文本框里粘贴id_rsa.pub文件的内容，然后点击"Add Key".
+		
+	添加远程连接库
+		
+		$ git remote add origin git@github.com:zhanghuming/nicai.git
+		
+		添加后，远程库的名字就是'origin'，这是Git默认的叫法，也可以改成别的
+			'git@github.com:zhanghuming/nicai.git'是github上创建完库生成的连接
+		
+		$ git push -u origin master		//把本地库的所有内容推送到远程库上
+		
+		用git push命令，实际上是把当前分支master推送到远程。
+		
+		由于远程库是空的，我们第一次推送master分支时，加上了-u参数，Git不但把本地的master分支内容推送到远程新的master分支，
+		还会把本地的master分支和远程的master分支关联起来，在以后的推送或者拉取时就可以简化命令。
+		
+13.从远程库克隆
+	$ git clone git@github.com:zhanghuming/nicai.git	//可以从远程库中克隆到本地

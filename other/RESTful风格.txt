@@ -1,0 +1,80 @@
+一句话概括：
+	URL定位资源，用HTTP动词（GET，POST，DELETE，DETC。。。）描述操作。
+	
+	1.REST描述的是在网络中client和server的一种交互形式；REST本身不实用，实用的是如何设计RESTful API（REST风格的网络接口）；
+	2.Server提供的RESTful API中，URL中只使用名词来指定资源，原则上不使用动词。
+		"资源"是REST架构或者说整个网络处理的核心。比如：
+		api.qc.com/v1/newsfeed  :获取某人的新鲜事；
+		api.qc.com/v1/friends	:获取某人的好友列表；
+		api.qc.com/v1/profile	:获取某人的详细信息；
+	3.用HTTP协议里的动词来实现资源的添加，修改，删除等操作。即通过HTTP动词来实现资源的状态转移：
+		GET 		用来获取资源，
+		POST		用来新建资源（也可以用于更新资源）
+		PUT			用来更新资源
+		DELETE		用来删除资源。
+		比如：DELETE http://api.qc.com/v1/friends :删除某人的好友(在http parameter指定好友id)
+		POST http://api.qc.com/v1/friends :添加好友
+		UPDATE http://api.qc.com/v1/profile :更新个人资料
+		
+		禁止使用： GET http://api.qc.com/v1/deleteFrient
+		
+	4.Server和Client之间传递某资源的一个表现形式，比如用JSON，XML传输文本，或者用JPG，WebP传输
+		图片等。
+	5.用HTTP Status Code传递Server的状态信息。比如最常用的200表示成功，500表示Server内部错误等。
+	
+RESTful API ：实用的是如何正确地理解RESTful架构和设计好RESTful API。
+	
+	Server的API如何设计才满足RESTful要求？
+	
+	首先是上述的那几点。外加一些附带的best practices:
+		1.URL root:
+		2.API versioning:
+		3.URI 使用名词而不是动词，且推荐用复数。
+		BAD
+			/getProducts
+			/listOrders
+			/retrieveClientByOrder?orderId=1
+		GOOD
+			GET /products : will return the list of all products
+			POST /products : will add a product to the collection
+			GET /products/4 : will retrieve product #4
+			
+		4.保证HEAD和GET方法是安全的，不会对资源状态有所改变（污染）。比如严格杜绝如下情况：
+			GET /deleteProduct?id=1
+			
+		5.资源的地址推荐用嵌套结构。比如：
+			GET /friends/1036923/profile
+			
+		6.警惕返回结果的大小。如果过大，及时进行分页或者加入限制。HTTP协议支持分页操作，
+			在Header中使用Link即可。
+		
+		7.使用正确的HTTP Status Code表示访问状态。
+		
+通俗的说RESTful API：
+	看URL就知道要什么
+	看http method就知道干什么
+	看http status code就知道结果如何
+
+
+意思就是，要把一个网站的内容当成一棵树，父节点通过一个map<string, vector<fuck>>来管理子节点，
+	然后每一个map都提供Find, Insert, Replace, Remove四个函数。然后直接翻译成HTTP的语言，
+	就是你见到的那些东西了。你用URL来定位到其中一个map里面的vector，然后开始操。
+	
+	
+	
+	
+	REST架构风格最重要的架构约束有6个：
+		客户-服务器（Client-Server） 
+		通信只能由客户端单方面发起，表现为请求-响应的形式。
+		无状态（Stateless） 
+		通信的会话状态（Session State）应该全部由客户端负责维护。
+		缓存（Cache） 
+		响应内容可以在通信链的某处被缓存，以改善网络效率。
+		统一接口（Uniform Interface） 
+		通信链的组件之间通过统一的接口相互通信，以提高交互的可见性。
+		分层系统（Layered System） 
+		通过限制组件的行为（即，每个组件只能“看到”与其交互的紧邻层），将架构分解为若干等级的层。
+		按需代码（Code-On-Demand，可选） 
+		支持通过下载并执行一些代码（例如Java Applet、Flash或JavaScript），对客户端的功能进行扩展。
+
+			
