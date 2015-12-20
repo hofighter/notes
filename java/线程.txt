@@ -1,0 +1,261 @@
+线程与进程的关系：
+	
+	进程 —— 运行中的程序。进程有如下特征：
+		A.独立性。拥有自己的资源，拥有自己独立的内存区。
+				  通常来说，一个进程的内存空间，是不允许其他进程访问的。
+				  想Windows，A进程可以通过某种方式修改其他进程的内存值————外挂
+		B.动态性。程序时静止的。运行起来才叫进程。
+		C.并发性。一个操作系统可以同时"并发（concurrent）"运行多个进程。
+		
+	线程 —— 进程中的"并发（concurrent）"执行流。
+			Lightweight Process (轻量级进程)
+			
+		进程与线程的区别：Process是有独立内存空间的，因此创建Process的成本比创建线程的成本要高。
+			
+	什么"并发"？什么叫"并行"？
+	  并发：即使只有一个CPU，多个进程，或者多个线程在CPU上【快速轮换】执行。
+			在一个时刻，只有与CPU个数相同的进程真正在执行。
+			其他进程都处于等待状态。
+			————对于用户来说，感觉是多个进程同时执行。
+	  并行（Parallel）：必须有一个以上CPU，这样就可以保证在同一时刻，
+						至少有与CPU个数相同的进程真正在执行，
+						这些正在执行的进程就是在并行。
+						并行：是多个进程真正在多个CPU上同时执行。
+						
+						
+	多线程的好处：
+		1.功能上类似多进程。
+		2.创建成本低，效率高。
+		3.所有线程共享进程的内存，因此线程之间通信非常方便。
+		4.Java语言的多线程非常优秀。
+		
+/**
+	Thread  ———— 就是一个线程类
+	Java程序默认有主线程，主线程的线程执行就是main方法。
+*/
+		
+Java的创建多线程的方法（三种）：
+	1.继承Thread，重写一个run()方法。
+		——这个run()方法就是线程执行体。
+		不能有返回值，不能抛出异常
+		创建Thread的子类的实例即可启动。
+	
+	2.实现Runnable，重写一个run()方法。
+		需要把Runnable对象包装成Thread对象后再执行。
+		不能有返回值，不能抛出异常。
+		需要把Runnable对象包装成Thread对象后再启动。
+		
+	3.实现Callable（就是Runnable增强版），
+		————重写call()方法（有返回值，可以声明抛出异常）。
+		先把Callable包装成Runnable
+		再把Runnable对象包装成Thread对象后再启动。
+		FutureTask实现了Runnable接口，因此需要将Callable转换成FutureTask，
+		然后当作Runnable对象直接传入Thread对象中
+		而且可用FutureTask获得线程的返回值。
+	
+启动线程：
+	调用Thread对象的start()方法，不调用run方法。
+	
+
+创建线程的方式的对比：创建线程的方式可分为两类：
+	1.继承Thread类。
+	2.实现Runnable或Callable接口。
+	
+	实现接口的方式更好，原因如下：
+	A.实现接口之后，依然可以继承其他类，但如果继承了Thread类，就无法再去继承别的类。
+	B.实现接口时，可以让多个线程共享同一个Runnable对象。
+	   可以更好的实现代码与数据的分离，形成更清晰的逻辑。
+	
+	实现接口创建多线程唯一的不足是：编程略微复杂一些。
+	
+	
+线程的状态：
+	
+	【当调用start之后，只是启动线程，线程并不会立即执行。】
+	
+	新建  -  刚刚创建出来的Thread对象
+	就绪  -  调用start()方法。
+	运行  -  
+	阻塞  -  
+	死亡  -  
+	
+控制线程的方法
+	
+	join线程 - 启动一条线程，多条线程并发执行。
+			   被join的线程必须先执行完成。
+			join() - 一直等待，知道被joined的线程死亡。
+			join(long millis)只等待milllis毫秒，如果被joined的线程能在指定时间内完成就最好。
+			join(long millis,int nanos)时间精确到纳秒。
+			
+	后台线程（Daemon Thread）:守护线程 - 如果所有的前台线程结束，它会自动死亡。
+		Thread.setDaemon(true);
+		
+	线程暂停 - Thread.sleep(400):让当前线程暂停400ms，并进入阻塞状态。
+	
+	线程让步 - Thread.yield():让线程让出CPU，进入就绪状态。
+								所有有可能出现的情况，该线程让出CPU进入就绪之后，
+								线程调度器再次将它调度出来了。
+	sleep与yield的区别：
+		- sleep方法暂停当前线程后，会给其他线程执行机会，不会理会其他线程的优先级
+		  但yield方法只会给优先级相同，或者优先级更高的线程执行机会。
+		- sleep方法会将线程转入阻塞状态，知道经过阻塞时间才会转入就绪状态。
+		  而yield不会将线程转入阻塞状态，它只是强制当前线程进入就绪状态。
+		  因此完全有可能某个线程调用yield方法暂停之后，
+		  立即再次获得处理器资源被执行。
+		- sleep方法声明抛出InterruptedException异常，
+		  所以调用sleep方法时要么捕捉该异常，要么显式生命抛出该异常。
+		  而yield方法则没有声明抛出任何异常。
+		- sleep方法比yield方法有更好的可移植性，
+		  通常不要依靠yield来控制并发线程的执行。 
+		  
+	改变线程的优先级：
+		优先级越高，线程会获得更多被执行的机会。
+		- getPriority()：放回优先级。
+		- setPriority(int value)：设置优先级。优先级在1-10之间。
+		设置优先级时，优先级并不能与操作系统的优先级很好地对应。
+		因此并不建议直接设置优先级的值，而是建议用常量，
+		比如Thread.MAX_PRIORITY、Thread.MIN_PRIORITY
+		
+		
+线程同步：
+
+	Vector、Hashtable都是线程安全的。
+	
+	竞争资源（共享资源） - 如果有多条线程需要并发访问、并修改某个对象，
+							该对象就是"竞争资源"。
+							
+	为了避免多个线程"自由竞争"修改共享资源所导致的不安全问题。
+		于是就考虑"加锁"。
+	
+	第一种方式：用同步代码块。
+		-- 需要显式指定同步监视器。
+	public void run()
+	{
+		//同步代码块
+		synchronized(account)//synchronized括号中的对象，被称为同步锁
+		{
+			if(account.getBalance() > drawAmount)
+			{
+				System.out.println("取钱成功，吐出钞票 "+ drawAmount);
+				account.setBalance(account.getBalance() - drawAmount);
+				System.out.println("还剩余额为： "+account.getBalance());
+			}
+			else
+			{
+				System.out.println("余额不足，取钱失败！");
+			}
+		}
+	}
+	第二种方式：用同步方法。
+		--  相当于使用方法的调用者作为同步监视器。
+			如果方法是实例方法，相当于this是同步监视器。
+			如果方法是类方法，相当于this作为同步监视器。
+	public synchronized void draw(double drawAmount)
+	{
+		if(getBalance() > drawAmount)
+		{
+			System.out.println("取钱成功，吐出钞票 "+ drawAmount);
+			setBalance(getBalance() - drawAmount);
+			System.out.println("还剩余额为： "+getBalance());
+		}
+		else
+		{
+			System.out.println("余额不足，取钱失败！");
+		}
+	}
+	
+	public void run()
+	{
+		account.draw(drawAmount);
+	}
+	
+	它们的实现机制是完全相同的：当进程需要进入某个被"同步监视器"监视的代码之前
+		线程必须先获得"同步监视器"。
+		
+		这样就保证了在任意一个时刻，只有一条线程能进入被"同步监视器"监视的代码。
+		
+	从语法的角度来看，任意对象都可作为同步监视器。
+	但从程序的逻辑来看，选择"竞争资源"作为同步监视器。
+	
+	
+	
+	线程同步的关键：
+		任意的线程，进入同步监视器监视的代码之外，必须先对同步监视器加锁。
+	
+	什么时候释放对同步监视器的加锁：
+		1.同步代码块或同步方法执行完成。
+		2.在代码块中遇到break、return跳出了该代码块。
+		3.执行同步代码块或同步方法时遇到了未捕获的异常。
+		4.调用了同步监视器的wait()方法。
+		
+	下面这些情况不会释放：
+		1.sleep()、yield()都不会释放。
+		2.suspend()也不会释放。
+		
+线程通信：
+
+	1.如果不加控制，多个线程"自由"的并发执行。
+	2.可以通过同步，来解决多个线程并发访问竞争资源的问题。
+	  线程安全，必然带来性能的降低。(Vector，Hashtable)
+	  Java提倡为很多类提供两个版本；线程安全的版本，适合多线程访问。(StringBuffer)
+									线程不安全的版本，适合单线程环境。(StringBuilder)
+									
+	3.如果希望线程之间能更有序地执行，
+	  生产者-消费者问题。
+	  
+	  Object 的
+		wait() - 控制线程暂停，同时释放对【同步监视器】的加锁
+				 它会一直等待，直到收到"唤醒"通知。
+		notify() - 发送唤醒通知。
+		notifyAll() - 发送唤醒通知。唤醒所有wait的线程。
+		--只有同步监视器【不是用线程调用】才能调用这三个方法。
+		
+线程组与未处理的异常
+	
+	Java使用ThreadGroup来代表线程组
+	
+	怎样把线程放入指定的线程组中呢？
+		-- 在创建一个Thread实例时，通过传入的ThreadGroup对象，即可将该线程放入指定的线程组。
+	通过线程组对这批线程进行整体的管理。
+	
+	ThreadGroup提供了如下两个方法：
+		setDaemon(boolean daemon):控制将线程组本身都设置为后台线程组。
+									并不是将它包含的线程设为后台线程。
+			如果它包含的所有线程都死了，后台线程组本身也会自动销毁。
+		setMaxPriority(优先级)：它是设置该线程组的最高优先级，之后创建的线程不能超过这个优先级
+								该线程组已有的线程的优先级不会受影响。
+								
+	在JDK1.5以前，如果线程出现了异常，系统会自动回调它所在线程组的
+		uncaughtException(Thread t, Throwable e)来修复该异常。
+	在JDK1.5之后，线程允许自行设置"异常处理器"，无需线程组。
+		类：static void setDefaultUncaughtExceptionHandler(Thread.UncaughtExceptionHandler eh) ：为所有线程（包括主线程）设置默认的异常处理器
+		实例：void setUncaughtExceptionHandler(Thread.UncaughtExceptionHandler eh) ：为当前线程实例设置异常处理器
+			实例设置的异常处理器会覆盖类设置的默认异常处理器
+			
+			
+线程池（pool）
+	池的本质，就是一种"缓存"技术。
+	是否要缓存一个对象：取决于该对象的创建成本。当然要考虑系统内存大小。
+	
+	缓存的本质：牺牲空间来换取时间。
+	
+	线程对象的创建成本比较大。虽然创建线程的成本，比创建进程的成本要小得多，
+												但相比普通Java对象，Thread的创建成本依然较大。
+	为了解决这个问题，我们用线程池。
+	
+	JDK 1.5 提供了良好的线程池支持。
+	
+	Executors - 创建线程池、线程工厂的工具类。
+	ExecutorService - 它就是线程池。
+	ScheduledExecutorService - 它是ExecutorService的子接口。
+								它可以周期性地调度任务。
+		/*
+			Arrays / objects / Collections / Paths / Files / Executors
+		*/
+	线程池的编程步骤：
+	（1）通过Executors的静态工厂方法创建ExecutorService或ScheduledExecutorService
+	（2）调用ExecutorService的方法提交线程即可。
+	（3）调用线程池的shutdown()关闭线程池。
+	
+		
+		
